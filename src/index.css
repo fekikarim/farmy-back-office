@@ -1,8 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Sora:wght@100..800&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-accent-primary: #90A53E;
+  --color-accent-deep: #4E7034;
+  
+  --color-dark-bg: #0B0F0A;
+  --color-dark-surface: #1A2315;
+  --color-dark-border: #2A3620;
+  --color-dark-text: #6B7F62;
+  
+  --color-light-bg: #F5F7F3;
+  --color-light-surface: #FFFFFF;
+  --color-light-border: #EDEEE9;
+
+  --font-sora: "Sora", sans-serif;
+  --font-dmsans: "DM Sans", sans-serif;
+
+  --background-image-accent-gradient: linear-gradient(135deg, #90A53E 0%, #4E7034 100%);
+  --shadow-accent-glow: 0 0 16px rgba(144, 165, 62, 0.35);
+}
 
 @layer base {
   :root {
@@ -34,7 +52,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-[var(--surface)] bg-opacity-70 backdrop-blur-md border border-[var(--border)] rounded-2xl shadow-sm;
+    @apply bg-[var(--surface)]/70 backdrop-blur-md border border-[var(--border)] rounded-2xl shadow-sm;
   }
 
   .btn-primary {
@@ -61,5 +79,5 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-accent-primary bg-opacity-20 rounded-full hover:bg-opacity-40 transition-all;
+  @apply bg-accent-primary/20 rounded-full hover:bg-accent-primary/40 transition-all;
 }

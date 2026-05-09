@@ -13,6 +13,7 @@ import {
   Truck,
   ShoppingCart
 } from 'lucide-react';
+import { cn } from '../utils/cn';
 import StatCard from '../components/ui/StatCard';
 import { 
   AreaChart, 

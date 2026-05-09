@@ -1,12 +1,15 @@
 import React from 'react';
-import CountUp from 'react-countup';
-import { LucideIcon, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import CountUpModule from 'react-countup';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
+
+// Handle potential ESM/CJS interop issues with react-countup
+const CountUp = (CountUpModule as any).default || CountUpModule;
 
 interface StatCardProps {
   title: string;
   value: number;
-  icon: LucideIcon;
+  icon: React.ElementType;
   trend?: number;
   prefix?: string;
   suffix?: string;
