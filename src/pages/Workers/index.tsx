@@ -61,6 +61,15 @@ const WorkersPage = () => {
     status: null
   });
 
+  const [detailsModal, setDetailsModal] = useState<{
+    isOpen: boolean;
+    worker: any | null;
+  }>({
+    isOpen: false,
+    worker: null
+  });
+
+
   // Debounce search
   React.useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
@@ -111,6 +120,14 @@ const WorkersPage = () => {
   const handleReset = (worker: any) => {
     openConfirmModal(worker, 'pending');
   };
+
+  const handleViewDetails = (worker: any) => {
+    setDetailsModal({
+      isOpen: true,
+      worker
+    });
+  };
+
 
 
   const columns = [
@@ -231,6 +248,7 @@ const WorkersPage = () => {
 
 
           <button 
+            onClick={() => handleViewDetails(worker)}
             className="p-1.5 rounded-lg hover:bg-accent-primary/10 text-accent-primary transition-all active:scale-95"
             title="View Details"
           >
@@ -239,6 +257,7 @@ const WorkersPage = () => {
         </div>
       )
     }
+
 
   ];
 
@@ -426,7 +445,155 @@ const WorkersPage = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Worker Details Modal */}
+      <Modal
+        isOpen={detailsModal.isOpen}
+        onClose={() => setDetailsModal({ isOpen: false, worker: null })}
+        title="Worker Detailed Profile"
+        className="max-w-2xl"
+      >
+        {detailsModal.worker && (
+          <div className="space-y-8">
+            {/* Profile Header */}
+            <div className="flex items-start gap-6">
+              <div className="h-20 w-20 rounded-2xl bg-accent-gradient flex items-center justify-center text-white text-3xl font-bold shadow-xl">
+                {detailsModal.worker.user?.profile?.name?.charAt(0) || '?'}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-2xl font-bold">{detailsModal.worker.user?.profile?.name || 'Unknown'}</h4>
+                  <StatusBadge status={detailsModal.worker.verification_status} />
+                </div>
+                <p className="text-text-muted mt-1">{detailsModal.worker.user?.email}</p>
+                <div className="flex items-center gap-4 mt-3">
+                  <div className="flex items-center gap-1 text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg">
+                    <Star className="h-4 w-4 fill-current" />
+                    <span className="font-bold text-sm">{detailsModal.worker.rating || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-accent-primary bg-accent-primary/10 px-2 py-1 rounded-lg">
+                    <Calendar className="h-4 w-4" />
+                    <span className="font-bold text-sm">{detailsModal.worker.years_of_experience || 0} Years Exp.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-bg-primary border border-border text-center">
+                <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Daily Rate</p>
+                <p className="text-lg font-bold text-accent-primary">{detailsModal.worker.hourly_rate * 8} TND</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-bg-primary border border-border text-center">
+                <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Tasks</p>
+                <p className="text-lg font-bold">{detailsModal.worker.completed_tasks || 0}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-bg-primary border border-border text-center">
+                <p className="text-[10px] uppercase font-bold text-text-muted mb-1">On Time</p>
+                <p className="text-lg font-bold text-emerald-500">{detailsModal.worker.on_time_rate || 0}%</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-bg-primary border border-border text-center">
+                <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Disputes</p>
+                <p className="text-lg font-bold text-rose-500">{detailsModal.worker.dispute_count || 0}</p>
+              </div>
+            </div>
+
+            {/* Content Sections */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <h5 className="text-sm font-bold uppercase tracking-wider text-text-muted mb-3">About Worker</h5>
+                  <p className="text-sm leading-relaxed text-text-secondary italic">
+                    "{detailsModal.worker.bio || 'No bio provided.'}"
+                  </p>
+                </div>
+
+                <div>
+                  <h5 className="text-sm font-bold uppercase tracking-wider text-text-muted mb-3">Skills & Expertise</h5>
+                  <div className="flex flex-wrap gap-2">
+                    {detailsModal.worker.skills?.map((skill: string, idx: number) => (
+                      <span key={idx} className="px-3 py-1 bg-accent-primary/5 border border-accent-primary/20 rounded-full text-xs font-bold text-accent-primary">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h5 className="text-sm font-bold uppercase tracking-wider text-text-muted mb-3">Professional Info</h5>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-muted">Availability</span>
+                      <span className="font-bold capitalize">{detailsModal.worker.availability}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-muted">Languages</span>
+                      <span className="font-bold">{detailsModal.worker.languages_spoken?.join(', ') || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-muted">Location</span>
+                      <span className="font-bold">{detailsModal.worker.user?.profile?.city || 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h5 className="text-sm font-bold uppercase tracking-wider text-text-muted mb-3">Certifications</h5>
+                  <div className="space-y-2">
+                    {detailsModal.worker.certifications?.length > 0 ? (
+                      detailsModal.worker.certifications.map((cert: string, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 p-2 rounded-lg border border-emerald-100">
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span className="font-medium">{cert}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-text-muted italic">No certifications uploaded.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Footer */}
+            <div className="pt-6 border-t border-border flex justify-end gap-3">
+              <button 
+                onClick={() => setDetailsModal({ isOpen: false, worker: null })}
+                className="btn-secondary px-6"
+              >
+                Close
+              </button>
+              {detailsModal.worker.verification_status === 'pending' && (
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      setDetailsModal({ isOpen: false, worker: null });
+                      handleReject(detailsModal.worker);
+                    }}
+                    className="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg shadow-rose-500/20 transition-all active:scale-95"
+                  >
+                    Reject Profile
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setDetailsModal({ isOpen: false, worker: null });
+                      handleVerify(detailsModal.worker);
+                    }}
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+                  >
+                    Approve Profile
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
+
 
   );
 };
