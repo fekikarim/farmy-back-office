@@ -11,7 +11,9 @@ import {
   XCircle, 
   Info,
   Star,
-  Calendar
+  Calendar,
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import DataTable from '../../components/ui/DataTable';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -58,7 +60,12 @@ const WorkersPage = () => {
     limit: pageSize
   }), [activeTab, debouncedSearch, currentPage]);
 
-  const { data: workersData, isLoading, verifyWorker, isVerifying } = useWorkers(filters);
+  const { data: workersData, isLoading, error, refetch, isFetching, verifyWorker, isVerifying } = useWorkers(filters);
+
+  const handleRefresh = () => {
+    refetch();
+  };
+
 
   const handleVerify = (profileId: string) => {
     if (window.confirm('Are you sure you want to verify this worker?')) {
@@ -181,6 +188,16 @@ const WorkersPage = () => {
         </div>
         
         <div className="flex items-center gap-3">
+          <button 
+            onClick={handleRefresh}
+            className={cn(
+              "p-2 rounded-xl border border-border bg-surface hover:bg-bg-primary transition-all text-text-muted",
+              isFetching && "animate-spin text-accent-primary"
+            )}
+            title="Refresh Data"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
           <button className="btn-secondary flex items-center gap-2 text-sm">
             <Download className="h-4 w-4" /> Export Report
           </button>
@@ -203,15 +220,27 @@ const WorkersPage = () => {
           <div className="flex items-center gap-6 divide-x divide-border">
             <div className="text-center px-6">
               <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Pending</p>
-              <p className="text-2xl font-sora font-bold text-amber-500">{workersData?.stats?.pending || 0}</p>
+              {isLoading ? (
+                <div className="h-8 w-12 bg-border/40 rounded animate-pulse mx-auto"></div>
+              ) : (
+                <p className="text-2xl font-sora font-bold text-amber-500">{workersData?.stats?.pending || 0}</p>
+              )}
             </div>
             <div className="text-center px-6">
               <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Approved</p>
-              <p className="text-2xl font-sora font-bold text-accent-primary">{workersData?.stats?.verified || 0}</p>
+              {isLoading ? (
+                <div className="h-8 w-12 bg-border/40 rounded animate-pulse mx-auto"></div>
+              ) : (
+                <p className="text-2xl font-sora font-bold text-accent-primary">{workersData?.stats?.verified || 0}</p>
+              )}
             </div>
             <div className="text-center px-6">
               <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Rejected</p>
-              <p className="text-2xl font-sora font-bold text-red-500">{workersData?.stats?.rejected || 0}</p>
+              {isLoading ? (
+                <div className="h-8 w-12 bg-border/40 rounded animate-pulse mx-auto"></div>
+              ) : (
+                <p className="text-2xl font-sora font-bold text-red-500">{workersData?.stats?.rejected || 0}</p>
+              )}
             </div>
           </div>
         </div>
@@ -241,17 +270,33 @@ const WorkersPage = () => {
         ))}
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="flex flex-col items-center justify-center p-12 bg-rose-500/5 border border-rose-500/20 rounded-2xl text-center space-y-4">
+          <div className="h-12 w-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500">
+            <AlertCircle className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">Failed to fetch workers</h3>
+            <p className="text-text-muted max-w-xs mx-auto">There was an error communicating with the server. Please check your connection and try again.</p>
+          </div>
+          <button onClick={handleRefresh} className="btn-primary px-6">Retry Connection</button>
+        </div>
+      )}
+
       {/* Table with Custom Row Actions */}
-      <DataTable 
-        columns={columns as any} 
-        data={workersData?.data || []}
-        isLoading={isLoading}
-        onSearch={setSearchTerm}
-        totalItems={workersData?.pagination?.total}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-        remotePagination={true}
-      />
+      {!error && (
+        <DataTable 
+          columns={columns as any} 
+          data={workersData?.data || []}
+          isLoading={isLoading}
+          onSearch={setSearchTerm}
+          totalItems={workersData?.pagination?.total}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          remotePagination={true}
+        />
+      )}
     </div>
   );
 };
