@@ -29,9 +29,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     
     const newSocket = io(WS_URL, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
+      timeout: 20000,
     });
 
     newSocket.on('connect', () => {

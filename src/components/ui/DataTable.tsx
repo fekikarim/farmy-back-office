@@ -24,6 +24,7 @@ interface DataTableProps<T> {
   onSearch?: (query: string) => void;
   onExport?: () => void;
   pageSize?: number;
+  showToolbar?: boolean;
 }
 
 const DataTable = <T extends { id: string | number }>({ 
@@ -32,7 +33,8 @@ const DataTable = <T extends { id: string | number }>({
   isLoading = false,
   onSearch,
   onExport,
-  pageSize = 10
+  pageSize = 10,
+  showToolbar = false
 }: DataTableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,86 +49,82 @@ const DataTable = <T extends { id: string | number }>({
   };
 
   return (
-    <div className="glass-card overflow-hidden flex flex-col">
+    <div className="glass-card overflow-hidden flex flex-col border border-border shadow-xl shadow-black/5">
       {/* Table Toolbar */}
-      <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface/50">
-        <div className="relative max-w-xs w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Quick search..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="w-full bg-bg-primary border border-border rounded-lg pl-9 pr-4 py-2 text-sm focus:border-accent-primary outline-none transition-all"
-          />
-        </div>
+      {showToolbar && (
+        <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface/50">
+          <div className="relative max-w-xs w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
+            <input
+              type="text"
+              placeholder="Quick search..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="w-full bg-bg-primary border border-border rounded-lg pl-9 pr-4 py-2 text-sm focus:border-accent-primary outline-none transition-all"
+            />
+          </div>
 
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border rounded-lg hover:bg-bg-primary transition-all">
-            <Filter className="h-4 w-4" /> Filters
-          </button>
-          {onExport && (
-            <button 
-              onClick={onExport}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border rounded-lg hover:bg-bg-primary transition-all"
-            >
-              <Download className="h-4 w-4" /> Export
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border rounded-lg hover:bg-bg-primary transition-all">
+              <Filter className="h-4 w-4" /> Filters
             </button>
-          )}
+            {onExport && (
+              <button 
+                onClick={onExport}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border rounded-lg hover:bg-bg-primary transition-all"
+              >
+                <Download className="h-4 w-4" /> Export
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Table Body */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-bg-primary/50 text-xs font-bold uppercase tracking-wider text-text-muted">
+            <tr className="bg-bg-primary/50 text-[10px] font-bold uppercase tracking-widest text-text-muted">
               {columns.map((col, idx) => (
                 <th key={idx} className={cn("px-6 py-4 border-b border-border", col.className)}>
                   <div className="flex items-center gap-2">
                     {col.header}
-                    {col.sortable && <ArrowUpDown className="h-3 w-3 cursor-pointer hover:text-accent-primary" />}
+                    {col.sortable && <ArrowUpDown className="h-3 w-3 cursor-pointer hover:text-accent-primary transition-colors" />}
                   </div>
                 </th>
               ))}
-              <th className="px-6 py-4 border-b border-border text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-border/50">
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, idx) => (
-                <tr key={idx} className="animate-pulse">
+              Array.from({ length: 6 }).map((_, idx) => (
+                <tr key={idx}>
                   {columns.map((_, cIdx) => (
-                    <td key={cIdx} className="px-6 py-4">
-                      <div className="h-4 bg-border rounded w-full"></div>
+                    <td key={cIdx} className="px-6 py-5">
+                      <div className="h-3 bg-border/40 rounded-full w-full animate-pulse"></div>
                     </td>
                   ))}
-                  <td className="px-6 py-4 text-right">
-                    <div className="h-8 w-8 bg-border rounded ml-auto"></div>
-                  </td>
                 </tr>
               ))
             ) : paginatedData.length > 0 ? (
               paginatedData.map((item) => (
-                <tr key={item.id} className="hover:bg-accent-primary/[0.02] transition-colors group">
+                <tr key={item.id} className="hover:bg-accent-primary/[0.03] transition-colors group">
                   {columns.map((col, idx) => (
-                    <td key={idx} className={cn("px-6 py-4 text-sm", col.className)}>
+                    <td key={idx} className={cn("px-6 py-4 text-sm font-medium", col.className)}>
                       {typeof col.accessor === 'function' 
                         ? col.accessor(item) 
                         : (item[col.accessor] as React.ReactNode)}
                     </td>
                   ))}
-                  <td className="px-6 py-4 text-right">
-                    <button className="p-1.5 rounded-lg hover:bg-border text-text-muted transition-all">
-                      <MoreHorizontal className="h-5 w-5" />
-                    </button>
-                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length + 1} className="px-6 py-12 text-center text-text-muted">
-                  No records found matching your criteria.
+                <td colSpan={columns.length} className="px-6 py-20 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-3 opacity-40">
+                    <Search className="h-10 w-10" />
+                    <p className="text-sm font-medium">No platform participants found matching your criteria.</p>
+                  </div>
                 </td>
               </tr>
             )}
