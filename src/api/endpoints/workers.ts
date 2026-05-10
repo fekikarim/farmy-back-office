@@ -12,7 +12,7 @@ export const getAdminWorkers = async (filters: WorkerFilters) => {
   return response.data;
 };
 
-export const verifyWorkerProfile = async (profileId: string, status: 'verified' | 'rejected') => {
+export const verifyWorkerProfile = async (profileId: string, status: 'verified' | 'rejected' | 'pending') => {
   const response = await axiosInstance.patch(`/worker-profiles/${profileId}/verify`, { status });
   return response.data;
 };

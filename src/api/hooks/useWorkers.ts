@@ -12,7 +12,7 @@ export const useWorkers = (filters: WorkerFilters) => {
   });
 
   const verifyMutation = useMutation({
-    mutationFn: ({ profileId, status }: { profileId: string; status: 'verified' | 'rejected' }) => 
+    mutationFn: ({ profileId, status }: { profileId: string; status: 'verified' | 'rejected' | 'pending' }) => 
       verifyWorkerProfile(profileId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workers'] });

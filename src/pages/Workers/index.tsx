@@ -13,10 +13,12 @@ import {
   Star,
   Calendar,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  RotateCcw
 } from 'lucide-react';
 import DataTable from '../../components/ui/DataTable';
 import StatusBadge from '../../components/ui/StatusBadge';
+import Modal from '../../components/ui/Modal';
 import { cn } from '../../utils/cn';
 import { useWorkers } from '../../api/hooks/useWorkers';
 import { format } from 'date-fns';
@@ -47,6 +49,18 @@ const WorkersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    workerId: string;
+    workerName: string;
+    status: 'pending' | 'verified' | 'rejected' | null;
+  }>({
+    isOpen: false,
+    workerId: '',
+    workerName: '',
+    status: null
+  });
+
   // Debounce search
   React.useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
@@ -67,17 +81,37 @@ const WorkersPage = () => {
   };
 
 
-  const handleVerify = (profileId: string) => {
-    if (window.confirm('Are you sure you want to verify this worker?')) {
-      verifyWorker({ profileId, status: 'verified' });
+  const openConfirmModal = (worker: any, status: 'verified' | 'rejected' | 'pending') => {
+    setConfirmModal({
+      isOpen: true,
+      workerId: worker.id,
+      workerName: worker.user?.profile?.name || 'Unknown Worker',
+      status
+    });
+  };
+
+  const handleConfirmAction = () => {
+    if (confirmModal.workerId && confirmModal.status) {
+      verifyWorker({ profileId: confirmModal.workerId, status: confirmModal.status }, {
+        onSuccess: () => {
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        }
+      });
     }
   };
 
-  const handleReject = (profileId: string) => {
-    if (window.confirm('Are you sure you want to reject this worker?')) {
-      verifyWorker({ profileId, status: 'rejected' });
-    }
+  const handleVerify = (worker: any) => {
+    openConfirmModal(worker, 'verified');
   };
+
+  const handleReject = (worker: any) => {
+    openConfirmModal(worker, 'rejected');
+  };
+
+  const handleReset = (worker: any) => {
+    openConfirmModal(worker, 'pending');
+  };
+
 
   const columns = [
     {
@@ -142,29 +176,62 @@ const WorkersPage = () => {
     {
       header: 'Actions',
       accessor: (worker: any) => (
-        <div className="flex items-center gap-2">
-          {worker.verification_status === 'pending' && (
+        <div className="flex items-center gap-1">
+          {worker.verification_status === 'pending' ? (
             <>
               <button 
-                onClick={() => handleVerify(worker.id)}
+                onClick={() => handleVerify(worker)}
                 disabled={isVerifying}
-                className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all"
+                className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-95"
                 title="Verify Worker"
               >
                 <CheckCircle2 className="h-4 w-4" />
               </button>
               <button 
-                onClick={() => handleReject(worker.id)}
+                onClick={() => handleReject(worker)}
                 disabled={isVerifying}
-                className="p-2 rounded-lg hover:bg-rose-500/10 text-rose-500 transition-all"
+                className="p-1.5 rounded-lg hover:bg-rose-500/10 text-rose-500 transition-all active:scale-95"
                 title="Reject Worker"
               >
                 <XCircle className="h-4 w-4" />
               </button>
             </>
+          ) : (
+            <button 
+              onClick={() => handleReset(worker)}
+              disabled={isVerifying}
+              className="p-1.5 rounded-lg hover:bg-amber-500/10 text-amber-500 transition-all active:scale-95"
+              title="Reset to Pending"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
           )}
+
+          {worker.verification_status === 'rejected' && (
+            <button 
+              onClick={() => handleVerify(worker)}
+              disabled={isVerifying}
+              className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all active:scale-95"
+              title="Verify Anyway"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+            </button>
+          )}
+
+          {worker.verification_status === 'verified' && (
+            <button 
+              onClick={() => handleReject(worker)}
+              disabled={isVerifying}
+              className="p-1.5 rounded-lg hover:bg-rose-500/10 text-rose-500 transition-all active:scale-95"
+              title="Reject Worker"
+            >
+              <XCircle className="h-4 w-4" />
+            </button>
+          )}
+
+
           <button 
-            className="p-2 rounded-lg hover:bg-accent-primary/10 text-accent-primary transition-all"
+            className="p-1.5 rounded-lg hover:bg-accent-primary/10 text-accent-primary transition-all active:scale-95"
             title="View Details"
           >
             <Eye className="h-4 w-4" />
@@ -172,6 +239,7 @@ const WorkersPage = () => {
         </div>
       )
     }
+
   ];
 
   return (
@@ -247,12 +315,12 @@ const WorkersPage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border w-fit">
+      <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border w-fit max-w-full overflow-x-auto no-scrollbar">
         {[
+          { id: 'all', label: 'All Workers', icon: UserCheck },
           { id: 'pending', label: 'Pending Review', icon: Info },
           { id: 'verified', label: 'Approved', icon: CheckCircle2 },
           { id: 'rejected', label: 'Rejected', icon: XCircle },
-          { id: 'all', label: 'All Workers', icon: UserCheck },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -297,7 +365,69 @@ const WorkersPage = () => {
           remotePagination={true}
         />
       )}
+
+      {/* Status Change Confirmation Modal */}
+      <Modal
+        isOpen={confirmModal.isOpen}
+        onClose={() => !isVerifying && setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        title="Change Verification Status"
+        className="max-w-md"
+      >
+        <div className="space-y-6">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className={cn(
+              "h-16 w-16 rounded-full flex items-center justify-center shadow-lg",
+              confirmModal.status === 'verified' && "bg-emerald-500/10 text-emerald-500 shadow-emerald-500/20",
+              confirmModal.status === 'rejected' && "bg-rose-500/10 text-rose-500 shadow-rose-500/20",
+              confirmModal.status === 'pending' && "bg-amber-500/10 text-amber-500 shadow-amber-500/20"
+            )}>
+              {confirmModal.status === 'verified' && <CheckCircle2 className="h-8 w-8" />}
+              {confirmModal.status === 'rejected' && <XCircle className="h-8 w-8" />}
+              {confirmModal.status === 'pending' && <RotateCcw className="h-8 w-8" />}
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-bold">Update {confirmModal.workerName}?</h4>
+              <p className="text-sm text-text-muted mt-1">
+                Are you sure you want to change this worker's status to{' '}
+                <span className={cn(
+                  "font-bold",
+                  confirmModal.status === 'verified' && "text-emerald-500",
+                  confirmModal.status === 'rejected' && "text-rose-500",
+                  confirmModal.status === 'pending' && "text-amber-500"
+                )}>
+                  {confirmModal.status?.toUpperCase()}
+                </span>?
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+              disabled={isVerifying}
+              className="flex-1 btn-secondary py-2.5"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleConfirmAction}
+              disabled={isVerifying}
+              className={cn(
+                "flex-1 py-2.5 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
+                confirmModal.status === 'verified' && "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30",
+                confirmModal.status === 'rejected' && "bg-rose-500 hover:bg-rose-600 shadow-rose-500/30",
+                confirmModal.status === 'pending' && "bg-amber-500 hover:bg-amber-600 shadow-amber-500/30"
+              )}
+            >
+              {isVerifying && <RefreshCw className="h-4 w-4 animate-spin" />}
+              Confirm Change
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
+
   );
 };
 
