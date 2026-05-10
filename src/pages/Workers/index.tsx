@@ -16,6 +16,8 @@ import {
 import DataTable from '../../components/ui/DataTable';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { cn } from '../../utils/cn';
+import { useWorkers } from '../../api/hooks/useWorkers';
+import { format } from 'date-fns';
 
 interface WorkerProfile {
   id: string;
@@ -37,24 +39,50 @@ const mockWorkers: WorkerProfile[] = [
 ];
 
 const WorkersPage = () => {
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'verified' | 'rejected' | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
-  const filteredWorkers = mockWorkers.filter(worker => {
-    if (activeTab === 'all') return true;
-    return worker.status === activeTab;
-  });
+  // Debounce search
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const filters = React.useMemo(() => ({
+    status: activeTab === 'all' ? undefined : activeTab,
+    search: debouncedSearch || undefined,
+    page: currentPage,
+    limit: pageSize
+  }), [activeTab, debouncedSearch, currentPage]);
+
+  const { data: workersData, isLoading, verifyWorker, isVerifying } = useWorkers(filters);
+
+  const handleVerify = (profileId: string) => {
+    if (window.confirm('Are you sure you want to verify this worker?')) {
+      verifyWorker({ profileId, status: 'verified' });
+    }
+  };
+
+  const handleReject = (profileId: string) => {
+    if (window.confirm('Are you sure you want to reject this worker?')) {
+      verifyWorker({ profileId, status: 'rejected' });
+    }
+  };
 
   const columns = [
     {
       header: 'Worker',
-      accessor: (worker: WorkerProfile) => (
+      accessor: (worker: any) => (
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-full bg-accent-gradient flex items-center justify-center text-white font-bold text-xs shadow-sm">
-            {worker.name.charAt(0)}
+            {worker.user?.profile?.name?.charAt(0) || '?'}
           </div>
           <div>
-            <p className="font-bold">{worker.name}</p>
-            <p className="text-[10px] text-text-muted mt-0.5">{worker.email}</p>
+            <p className="font-bold">{worker.user?.profile?.name || 'Unknown'}</p>
+            <p className="text-[10px] text-text-muted mt-0.5">{worker.user?.email}</p>
           </div>
         </div>
       ),
@@ -62,9 +90,9 @@ const WorkersPage = () => {
     },
     {
       header: 'Skills',
-      accessor: (worker: WorkerProfile) => (
+      accessor: (worker: any) => (
         <div className="flex flex-wrap gap-1">
-          {worker.skills.map((skill, idx) => (
+          {worker.skills?.map((skill: string, idx: number) => (
             <span key={idx} className="px-2 py-0.5 bg-bg-primary border border-border rounded text-[10px] font-medium text-text-muted">
               {skill}
             </span>
@@ -74,35 +102,68 @@ const WorkersPage = () => {
     },
     {
       header: 'Daily Rate',
-      accessor: (worker: WorkerProfile) => (
-        <span className="font-bold text-accent-primary">{worker.dailyRate} TND</span>
+      accessor: (worker: any) => (
+        <span className="font-bold text-accent-primary">{worker.hourly_rate * 8} TND</span>
       ),
       sortable: true
     },
     {
       header: 'Rating',
-      accessor: (worker: WorkerProfile) => (
+      accessor: (worker: any) => (
         <div className="flex items-center gap-1 text-amber-500">
           <Star className="h-3.5 w-3.5 fill-current" />
-          <span className="font-bold text-sm">{worker.rating}</span>
+          <span className="font-bold text-sm">{worker.rating || 'N/A'}</span>
         </div>
       ),
       sortable: true
     },
     {
       header: 'Submitted At',
-      accessor: (worker: WorkerProfile) => (
+      accessor: (worker: any) => (
         <div className="flex items-center gap-1.5 text-text-muted text-xs">
           <Calendar className="h-3.5 w-3.5" />
-          {new Date(worker.submittedAt).toLocaleDateString()}
+          {format(new Date(worker.createdAt), 'MMM dd, yyyy')}
         </div>
       ),
       sortable: true
     },
     {
       header: 'Status',
-      accessor: (worker: WorkerProfile) => <StatusBadge status={worker.status} />,
+      accessor: (worker: any) => <StatusBadge status={worker.verification_status} />,
       sortable: true
+    },
+    {
+      header: 'Actions',
+      accessor: (worker: any) => (
+        <div className="flex items-center gap-2">
+          {worker.verification_status === 'pending' && (
+            <>
+              <button 
+                onClick={() => handleVerify(worker.id)}
+                disabled={isVerifying}
+                className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all"
+                title="Verify Worker"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+              </button>
+              <button 
+                onClick={() => handleReject(worker.id)}
+                disabled={isVerifying}
+                className="p-2 rounded-lg hover:bg-rose-500/10 text-rose-500 transition-all"
+                title="Reject Worker"
+              >
+                <XCircle className="h-4 w-4" />
+              </button>
+            </>
+          )}
+          <button 
+            className="p-2 rounded-lg hover:bg-accent-primary/10 text-accent-primary transition-all"
+            title="View Details"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+        </div>
+      )
     }
   ];
 
@@ -142,15 +203,15 @@ const WorkersPage = () => {
           <div className="flex items-center gap-6 divide-x divide-border">
             <div className="text-center px-6">
               <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Pending</p>
-              <p className="text-2xl font-sora font-bold text-amber-500">12</p>
+              <p className="text-2xl font-sora font-bold text-amber-500">{workersData?.stats?.pending || 0}</p>
             </div>
             <div className="text-center px-6">
               <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Approved</p>
-              <p className="text-2xl font-sora font-bold text-accent-primary">148</p>
+              <p className="text-2xl font-sora font-bold text-accent-primary">{workersData?.stats?.verified || 0}</p>
             </div>
             <div className="text-center px-6">
               <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Rejected</p>
-              <p className="text-2xl font-sora font-bold text-red-500">23</p>
+              <p className="text-2xl font-sora font-bold text-red-500">{workersData?.stats?.rejected || 0}</p>
             </div>
           </div>
         </div>
@@ -160,7 +221,7 @@ const WorkersPage = () => {
       <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border w-fit">
         {[
           { id: 'pending', label: 'Pending Review', icon: Info },
-          { id: 'approved', label: 'Approved', icon: CheckCircle2 },
+          { id: 'verified', label: 'Approved', icon: CheckCircle2 },
           { id: 'rejected', label: 'Rejected', icon: XCircle },
           { id: 'all', label: 'All Workers', icon: UserCheck },
         ].map((tab) => (
@@ -183,8 +244,13 @@ const WorkersPage = () => {
       {/* Table with Custom Row Actions */}
       <DataTable 
         columns={columns as any} 
-        data={filteredWorkers}
-        onSearch={(q) => console.log('Searching workers:', q)}
+        data={workersData?.data || []}
+        isLoading={isLoading}
+        onSearch={setSearchTerm}
+        totalItems={workersData?.pagination?.total}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        remotePagination={true}
       />
     </div>
   );

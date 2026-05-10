@@ -26,6 +26,7 @@ const statusConfig: Record<string, { color: string, bg: string, border: string }
   active: { color: 'text-white', bg: 'bg-emerald-500 shadow-sm shadow-emerald-100 dark:shadow-none', border: 'border-emerald-600' },
   approved: { color: 'text-white', bg: 'bg-emerald-500 shadow-sm shadow-emerald-100 dark:shadow-none', border: 'border-emerald-600' },
   confirmed: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-900/40', border: 'border-emerald-200 dark:border-emerald-800' },
+  verified: { color: 'text-white', bg: 'bg-emerald-500 shadow-sm shadow-emerald-100 dark:shadow-none', border: 'border-emerald-600' },
   open: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-900/40', border: 'border-emerald-200 dark:border-emerald-800' },
   
   // Emerald / Completed
@@ -34,7 +35,7 @@ const statusConfig: Record<string, { color: string, bg: string, border: string }
   resolved: { color: 'text-teal-800 dark:text-teal-200', bg: 'bg-teal-100 dark:bg-teal-900/60', border: 'border-teal-300 dark:border-teal-700' },
   
   // Red / Danger
-  rejected: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/40', border: 'border-red-200 dark:border-red-800' },
+  rejected: { color: 'text-white', bg: 'bg-rose-500 shadow-sm shadow-rose-100 dark:shadow-none', border: 'border-rose-600' },
   cancelled: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/40', border: 'border-red-200 dark:border-red-800' },
   failed: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/40', border: 'border-red-200 dark:border-red-800' },
   
