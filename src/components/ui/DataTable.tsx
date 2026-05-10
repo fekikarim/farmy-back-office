@@ -14,6 +14,7 @@ interface Column<T> {
   header: string;
   accessor: keyof T | ((item: T) => React.ReactNode);
   sortable?: boolean;
+  sortKey?: string;
   className?: string;
 }
 
@@ -24,7 +25,14 @@ interface DataTableProps<T> {
   onSearch?: (query: string) => void;
   onExport?: () => void;
   pageSize?: number;
+  totalItems?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
   showToolbar?: boolean;
+  remotePagination?: boolean;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+  onSort?: (key: string, order: 'ASC' | 'DESC') => void;
 }
 
 const DataTable = <T extends { id: string | number }>({ 
@@ -34,18 +42,64 @@ const DataTable = <T extends { id: string | number }>({
   onSearch,
   onExport,
   pageSize = 10,
-  showToolbar = false
+  totalItems,
+  currentPage: externalPage,
+  onPageChange,
+  showToolbar = false,
+  remotePagination = false,
+  sortBy: externalSortBy,
+  sortOrder: externalSortOrder,
+  onSort
 }: DataTableProps<T>) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [internalPage, setInternalPage] = useState(1);
+  const [internalSortBy, setInternalSortBy] = useState<string | undefined>();
+  const [internalSortOrder, setInternalSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const totalPages = Math.ceil(data.length / pageSize);
-  const paginatedData = data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const currentPage = remotePagination ? (externalPage || 1) : internalPage;
+  const sortBy = remotePagination ? externalSortBy : internalSortBy;
+  const sortOrder = remotePagination ? externalSortOrder : internalSortOrder;
+  
+  const totalCount = remotePagination ? (totalItems || data.length) : data.length;
+  const totalPages = Math.ceil(totalCount / pageSize);
+  
+  const sortedData = remotePagination ? data : [...data].sort((a, b) => {
+    if (!sortBy) return 0;
+    const aVal = (a as any)[sortBy];
+    const bVal = (b as any)[sortBy];
+    if (aVal < bVal) return sortOrder === 'ASC' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'ASC' ? 1 : -1;
+    return 0;
+  });
+
+  const paginatedData = remotePagination ? data : sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handleSort = (key: string) => {
+    const newOrder = sortBy === key && sortOrder === 'ASC' ? 'DESC' : 'ASC';
+    if (remotePagination) {
+      onSort?.(key, newOrder);
+    } else {
+      setInternalSortBy(key);
+      setInternalSortOrder(newOrder);
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (remotePagination) {
+      onPageChange?.(page);
+    } else {
+      setInternalPage(page);
+    }
+  };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     onSearch?.(e.target.value);
-    setCurrentPage(1);
+    if (remotePagination) {
+      onPageChange?.(1);
+    } else {
+      setInternalPage(1);
+    }
   };
 
   return (
@@ -86,10 +140,23 @@ const DataTable = <T extends { id: string | number }>({
           <thead>
             <tr className="bg-bg-primary/50 text-[10px] font-bold uppercase tracking-widest text-text-muted">
               {columns.map((col, idx) => (
-                <th key={idx} className={cn("px-6 py-4 border-b border-border", col.className)}>
+                <th 
+                  key={idx} 
+                  className={cn(
+                    "px-6 py-4 border-b border-border", 
+                    col.sortable && "cursor-pointer hover:bg-bg-primary/80 transition-colors",
+                    col.className
+                  )}
+                  onClick={() => col.sortable && handleSort(col.sortKey || (typeof col.accessor === 'string' ? col.accessor as string : ''))}
+                >
                   <div className="flex items-center gap-2">
                     {col.header}
-                    {col.sortable && <ArrowUpDown className="h-3 w-3 cursor-pointer hover:text-accent-primary transition-colors" />}
+                    {col.sortable && (
+                      <ArrowUpDown className={cn(
+                        "h-3 w-3 transition-colors",
+                        sortBy === (col.sortKey || col.accessor) ? "text-accent-primary" : "text-text-muted/40"
+                      )} />
+                    )}
                   </div>
                 </th>
               ))}
@@ -140,7 +207,7 @@ const DataTable = <T extends { id: string | number }>({
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
             className="p-2 rounded-lg border border-border hover:bg-bg-primary disabled:opacity-50 disabled:pointer-events-none transition-all"
           >
@@ -153,7 +220,7 @@ const DataTable = <T extends { id: string | number }>({
               return (
                 <button
                   key={idx}
-                  onClick={() => setCurrentPage(pageNum)}
+                  onClick={() => handlePageChange(pageNum)}
                   className={cn(
                     "h-8 w-8 rounded-lg text-xs font-bold transition-all",
                     currentPage === pageNum 
@@ -167,9 +234,9 @@ const DataTable = <T extends { id: string | number }>({
             })}
             {totalPages > 5 && <span className="text-text-muted px-1">...</span>}
           </div>
-
+ 
           <button
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
             className="p-2 rounded-lg border border-border hover:bg-bg-primary disabled:opacity-50 disabled:pointer-events-none transition-all"
           >

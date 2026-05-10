@@ -16,6 +16,10 @@ export interface UserFilters {
   search?: string;
   role?: string;
   status?: string;
+  region?: string;
+  joinDate?: string;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
   page?: number;
   limit?: number;
 }

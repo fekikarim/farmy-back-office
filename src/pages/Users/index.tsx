@@ -13,7 +13,10 @@ import {
   ShieldCheck, 
   MapPin,
   RefreshCcw,
-  Plus
+  Plus,
+  Filter,
+  X,
+  RotateCcw
 } from 'lucide-react';
 import DataTable from '../../components/ui/DataTable';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -30,19 +33,29 @@ const UsersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   
+  // Filter states
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'banned'>('all');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  
   // Modal states
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   
+  // Sorting states
+  const [sortBy, setSortBy] = useState<string>('joinDate');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  
   // Form states
   const [adminForm, setAdminForm] = useState({ name: '', email: '', password: '' });
   const [editForm, setEditForm] = useState({ name: '', role: '', status: '' });
 
-  // Reset page on filter change
+  // Reset page on filter/sort change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, activeTab]);
+  }, [debouncedSearch, activeTab, selectedRegion, selectedStatus, selectedDate, sortBy, sortOrder]);
 
   // Debounce search
   React.useEffect(() => {
@@ -53,9 +66,14 @@ const UsersPage = () => {
   const filters = useMemo(() => ({
     search: debouncedSearch,
     role: activeTab === 'all' ? undefined : activeTab.slice(0, -1),
+    status: selectedStatus === 'all' ? undefined : selectedStatus,
+    region: selectedRegion || undefined,
+    joinDate: selectedDate || undefined,
+    sortBy,
+    sortOrder,
     page: currentPage,
     limit: pageSize
-  }), [debouncedSearch, activeTab, currentPage]);
+  }), [debouncedSearch, activeTab, selectedStatus, selectedRegion, selectedDate, sortBy, sortOrder, currentPage]);
 
   const { data: usersData, isLoading, refetch, updateUser, isUpdating, createAdmin, isCreating, handleExport } = useUsers(filters);
 
@@ -78,12 +96,14 @@ const UsersPage = () => {
           </div>
         </div>
       ),
-      sortable: true
+      sortable: true,
+      sortKey: 'name'
     },
     {
       header: 'Role',
       accessor: (user: any) => <StatusBadge status={user.role} />,
-      sortable: true
+      sortable: true,
+      sortKey: 'role'
     },
     {
       header: 'Region',
@@ -93,7 +113,8 @@ const UsersPage = () => {
           {user.region}
         </div>
       ),
-      sortable: true
+      sortable: true,
+      sortKey: 'region'
     },
     {
       header: 'Join Date',
@@ -103,12 +124,14 @@ const UsersPage = () => {
           {format(new Date(user.joinDate), 'MMM dd, yyyy')}
         </div>
       ),
-      sortable: true
+      sortable: true,
+      sortKey: 'joinDate'
     },
     {
       header: 'Status',
       accessor: (user: any) => <StatusBadge status={user.status} />,
-      sortable: true
+      sortable: true,
+      sortKey: 'status'
     },
     {
       header: 'Actions',
@@ -177,6 +200,17 @@ const UsersPage = () => {
       }
     });
   };
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setActiveTab('all');
+    setSelectedRegion('');
+    setSelectedStatus('all');
+    setSelectedDate('');
+    setSortBy('joinDate');
+    setSortOrder('DESC');
+    setCurrentPage(1);
+    setShowFilters(false);
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -227,18 +261,102 @@ const UsersPage = () => {
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative group min-w-[300px]">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted group-focus-within:text-accent-primary transition-colors" />
-          <input 
-            type="text"
-            placeholder="Quick search by name or email..."
-            className="w-full bg-bg-primary border border-border rounded-xl pl-11 pr-4 py-2.5 text-sm outline-none focus:border-accent-primary focus:ring-4 focus:ring-accent-primary/10 transition-all"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        {/* Search & Filter Trigger */}
+        <div className="flex flex-col md:flex-row items-center gap-4 flex-1">
+          <div className="relative group flex-1 w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted group-focus-within:text-accent-primary transition-colors" />
+            <input 
+              type="text"
+              placeholder="Quick search by name or email..."
+              className="w-full bg-bg-primary border border-border rounded-xl pl-11 pr-4 py-2.5 text-sm outline-none focus:border-accent-primary focus:ring-4 focus:ring-accent-primary/10 transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "btn-secondary flex items-center gap-2 px-5 py-2.5 whitespace-nowrap",
+              showFilters && "bg-accent-primary/10 border-accent-primary text-accent-primary"
+            )}
+          >
+            <Filter className="h-4 w-4" /> 
+            {showFilters ? 'Hide Filters' : 'Advanced Filters'}
+          </button>
+
+          {(searchTerm || activeTab !== 'all' || selectedRegion || selectedStatus !== 'all' || selectedDate || sortBy !== 'joinDate' || sortOrder !== 'DESC') && (
+            <button 
+              onClick={handleResetFilters}
+              className="btn-secondary flex items-center gap-2 px-5 py-2.5 text-rose-500 hover:bg-rose-500/10 border-rose-500/20 whitespace-nowrap"
+              title="Reset all filters and sorting"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span className="hidden sm:inline">Reset All</span>
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Advanced Filters Drawer/Panel */}
+      {showFilters && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-surface/30 p-6 rounded-2xl border border-border animate-in slide-in-from-top duration-300">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-text-muted px-1 flex items-center gap-2">
+              <MapPin className="h-3 w-3" /> Region / City
+            </label>
+            <input 
+              type="text"
+              placeholder="Filter by city..."
+              className="w-full bg-bg-primary border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent-primary transition-all"
+              value={selectedRegion}
+              onChange={(e) => setSelectedRegion(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-text-muted px-1 flex items-center gap-2">
+              <ShieldAlert className="h-3 w-3" /> Account Status
+            </label>
+            <select 
+              className="w-full bg-bg-primary border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent-primary transition-all"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value as any)}
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active Only</option>
+              <option value="banned">Banned Only</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-text-muted px-1 flex items-center gap-2">
+              <Calendar className="h-3 w-3" /> Join Date
+            </label>
+            <input 
+              type="date"
+              className="w-full bg-bg-primary border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent-primary transition-all"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            />
+          </div>
+
+          {(selectedRegion || selectedStatus !== 'all' || selectedDate) && (
+            <div className="md:col-span-3 flex justify-end">
+              <button 
+                onClick={() => {
+                  setSelectedRegion('');
+                  setSelectedStatus('all');
+                  setSelectedDate('');
+                }}
+                className="text-xs text-red-500 hover:text-red-600 font-bold flex items-center gap-1 transition-colors"
+              >
+                <X className="h-3 w-3" /> Clear All Filters
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Main Table Content */}
       <div className="relative">
@@ -247,35 +365,17 @@ const UsersPage = () => {
           data={usersData?.data || []} 
           isLoading={isLoading}
           pageSize={pageSize}
+          totalItems={usersData?.pagination?.total}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={(key, order) => {
+            setSortBy(key);
+            setSortOrder(order);
+          }}
+          remotePagination={true}
         />
-        
-        {/* Pagination & Results Summary */}
-        {!isLoading && usersData?.pagination && (
-          <div className="mt-4 flex items-center justify-between text-xs text-text-muted px-2">
-            <p>
-              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, usersData.pagination.total)} of {usersData.pagination.total} results
-            </p>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="p-1.5 rounded-lg border border-border hover:bg-surface disabled:opacity-50 transition-all"
-              >
-                Prev
-              </button>
-              <span className="font-bold text-text-primary px-3 py-1.5 bg-accent-primary/10 rounded-lg border border-accent-primary/20">
-                {currentPage}
-              </span>
-              <button 
-                onClick={() => setCurrentPage(prev => Math.min(usersData.pagination.totalPages, prev + 1))}
-                disabled={currentPage >= usersData.pagination.totalPages}
-                className="p-1.5 rounded-lg border border-border hover:bg-surface disabled:opacity-50 transition-all"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Add Admin Modal */}

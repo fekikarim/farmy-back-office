@@ -18,46 +18,46 @@ interface StatusBadgeProps {
 
 const statusConfig: Record<string, { color: string, bg: string, border: string }> = {
   // Amber / Warning
-  pending: { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-200 dark:border-amber-800/50' },
-  waiting: { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-200 dark:border-amber-800/50' },
-  order_created: { color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-900/30', border: 'border-indigo-200 dark:border-indigo-800/50' },
+  pending: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-900/40', border: 'border-amber-200 dark:border-amber-800' },
+  waiting: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-900/40', border: 'border-amber-200 dark:border-amber-800' },
+  order_created: { color: 'text-indigo-700 dark:text-indigo-300', bg: 'bg-indigo-50 dark:bg-indigo-900/40', border: 'border-indigo-200 dark:border-indigo-800' },
   
   // Farmy Green / Success
-  active: { color: 'text-accent-primary', bg: 'bg-accent-primary/10', border: 'border-accent-primary/20' },
-  approved: { color: 'text-accent-primary', bg: 'bg-accent-primary/10', border: 'border-accent-primary/20' },
-  confirmed: { color: 'text-accent-primary', bg: 'bg-accent-primary/10', border: 'border-accent-primary/20' },
-  open: { color: 'text-accent-primary', bg: 'bg-accent-primary/10', border: 'border-accent-primary/20' },
+  active: { color: 'text-white', bg: 'bg-emerald-500 shadow-sm shadow-emerald-100 dark:shadow-none', border: 'border-emerald-600' },
+  approved: { color: 'text-white', bg: 'bg-emerald-500 shadow-sm shadow-emerald-100 dark:shadow-none', border: 'border-emerald-600' },
+  confirmed: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-900/40', border: 'border-emerald-200 dark:border-emerald-800' },
+  open: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-900/40', border: 'border-emerald-200 dark:border-emerald-800' },
   
   // Emerald / Completed
-  delivered: { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', border: 'border-emerald-200 dark:border-emerald-800/50' },
-  completed: { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', border: 'border-emerald-200 dark:border-emerald-800/50' },
-  resolved: { color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-900/30', border: 'border-teal-200 dark:border-teal-800/50' },
+  delivered: { color: 'text-emerald-800 dark:text-emerald-200', bg: 'bg-emerald-100 dark:bg-emerald-900/60', border: 'border-emerald-300 dark:border-emerald-700' },
+  completed: { color: 'text-emerald-800 dark:text-emerald-200', bg: 'bg-emerald-100 dark:bg-emerald-900/60', border: 'border-emerald-300 dark:border-emerald-700' },
+  resolved: { color: 'text-teal-800 dark:text-teal-200', bg: 'bg-teal-100 dark:bg-teal-900/60', border: 'border-teal-300 dark:border-teal-700' },
   
   // Red / Danger
-  rejected: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-200 dark:border-red-800/50' },
-  cancelled: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-200 dark:border-red-800/50' },
-  failed: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-200 dark:border-red-800/50' },
+  rejected: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/40', border: 'border-red-200 dark:border-red-800' },
+  cancelled: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/40', border: 'border-red-200 dark:border-red-800' },
+  failed: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/40', border: 'border-red-200 dark:border-red-800' },
   
   // Blue / Info
-  in_transit: { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' },
-  in_progress: { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' },
-  preparing: { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' },
-  shipped: { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' },
+  in_transit: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/40', border: 'border-blue-200 dark:border-blue-800' },
+  in_progress: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/40', border: 'border-blue-200 dark:border-blue-800' },
+  preparing: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/40', border: 'border-blue-200 dark:border-blue-800' },
+  shipped: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/40', border: 'border-blue-200 dark:border-blue-800' },
   
   // Orange / Warning
-  suspended: { color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-900/30', border: 'border-orange-200 dark:border-orange-800/50' },
-  banned: { color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-900/30', border: 'border-orange-200 dark:border-orange-800/50' },
+  suspended: { color: 'text-white', bg: 'bg-orange-500 shadow-sm shadow-orange-100 dark:shadow-none', border: 'border-orange-600' },
+  banned: { color: 'text-white', bg: 'bg-rose-500 shadow-sm shadow-rose-100 dark:shadow-none', border: 'border-rose-600' },
   
-  // Platform Roles
-  admin: { color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-900/30', border: 'border-indigo-200 dark:border-indigo-800/50' },
-  farmer: { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30', border: 'border-emerald-200 dark:border-emerald-800/50' },
-  worker: { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-200 dark:border-amber-800/50' },
-  investor: { color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-900/30', border: 'border-teal-200 dark:border-teal-800/50' },
-  customer: { color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-900/30', border: 'border-slate-200 dark:border-slate-800/50' },
+  // Platform Roles (Solid / Premium Look)
+  admin: { color: 'text-white', bg: 'bg-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-none', border: 'border-indigo-700' },
+  farmer: { color: 'text-white', bg: 'bg-emerald-600 shadow-sm shadow-emerald-200 dark:shadow-none', border: 'border-emerald-700' },
+  worker: { color: 'text-white', bg: 'bg-amber-600 shadow-sm shadow-amber-200 dark:shadow-none', border: 'border-amber-700' },
+  investor: { color: 'text-white', bg: 'bg-teal-600 shadow-sm shadow-teal-200 dark:shadow-none', border: 'border-teal-700' },
+  customer: { color: 'text-white', bg: 'bg-slate-600 shadow-sm shadow-slate-200 dark:shadow-none', border: 'border-slate-700' },
   
   // Neutral
-  expired: { color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-900/30', border: 'border-slate-200 dark:border-slate-800/50' },
-  closed: { color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-900/30', border: 'border-slate-200 dark:border-slate-800/50' },
+  expired: { color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-50 dark:bg-slate-900/40', border: 'border-slate-200 dark:border-slate-800' },
+  closed: { color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-50 dark:bg-slate-900/40', border: 'border-slate-200 dark:border-slate-800' },
 };
 
 const StatusBadge = ({ status, label, className }: StatusBadgeProps) => {
