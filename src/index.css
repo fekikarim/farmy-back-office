@@ -15,6 +15,10 @@
   --color-light-surface: #FFFFFF;
   --color-light-border: #EDEEE9;
 
+  --color-surface: var(--surface);
+  --color-bg-primary: var(--bg-primary);
+  --color-border: var(--border);
+
   --font-sora: "Sora", sans-serif;
   --font-dmsans: "DM Sans", sans-serif;
 
