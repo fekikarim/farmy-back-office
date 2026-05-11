@@ -6,7 +6,7 @@ export type StatusType =
   | 'active' | 'approved' | 'confirmed'
   | 'delivered' | 'completed' | 'resolved'
   | 'rejected' | 'cancelled' | 'failed'
-  | 'in_transit' | 'in_progress' | 'preparing' | 'shipped'
+  | 'in_transit' | 'in_progress' | 'preparing' | 'shipped' | 'out_for_delivery' | 'nearby'
   | 'suspended' | 'banned' | 'expired'
   | 'open' | 'closed';
 
@@ -44,6 +44,8 @@ const statusConfig: Record<string, { color: string, bg: string, border: string }
   in_progress: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/40', border: 'border-blue-200 dark:border-blue-800' },
   preparing: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/40', border: 'border-blue-200 dark:border-blue-800' },
   shipped: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/40', border: 'border-blue-200 dark:border-blue-800' },
+  out_for_delivery: { color: 'text-sky-700 dark:text-sky-300', bg: 'bg-sky-50 dark:bg-sky-900/40', border: 'border-sky-200 dark:border-sky-800' },
+  nearby: { color: 'text-white', bg: 'bg-indigo-500 shadow-sm shadow-indigo-100', border: 'border-indigo-600' },
   
   // Orange / Warning
   suspended: { color: 'text-white', bg: 'bg-orange-500 shadow-sm shadow-orange-100 dark:shadow-none', border: 'border-orange-600' },
