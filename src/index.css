@@ -35,6 +35,7 @@
     --text-muted: #6B7F62;
     --accent: #90A53E;
     --accent-deep: #4E7034;
+    --dropdown-bg: #FFFFFF;
   }
 
   .dark {
@@ -43,6 +44,7 @@
     --border: #2A3620;
     --text-primary: #F5F7F3;
     --text-muted: #6B7F62;
+    --dropdown-bg: #12180F;
   }
 
   body {

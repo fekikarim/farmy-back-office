@@ -108,7 +108,7 @@ const Topbar = () => {
 
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute right-0 mt-3 w-80 bg-surface dark:bg-dark-bg shadow-2xl py-0 z-50 border border-border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 opacity-100">
+            <div className="absolute right-0 mt-3 w-80 bg-[var(--dropdown-bg)] shadow-2xl py-0 z-50 border border-border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 opacity-100">
               <div className="px-4 py-3 border-b border-border bg-bg-primary/50 flex items-center justify-between">
                 <h4 className="text-sm font-bold">Notifications</h4>
                 {unreadCount > 0 && (
@@ -198,7 +198,7 @@ const Topbar = () => {
 
           {/* User Dropdown */}
           {showUserMenu && (
-            <div className="absolute right-0 mt-3 w-64 bg-surface dark:bg-dark-bg shadow-2xl py-0 z-50 border border-border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 opacity-100">
+            <div className="absolute right-0 mt-3 w-64 bg-[var(--dropdown-bg)] shadow-2xl py-0 z-50 border border-border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 opacity-100">
               <div className="px-4 py-5 bg-accent-gradient relative overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -216,27 +216,27 @@ const Topbar = () => {
               </div>
               
               <div className="p-2 space-y-1">
-                <button className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-text-muted hover:text-accent-primary hover:bg-accent-primary/5 rounded-xl transition-all group">
-                  <div className="h-8 w-8 rounded-lg bg-bg-primary flex items-center justify-center group-hover:bg-accent-primary/10 transition-all">
+                <button className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-text-muted hover:text-accent-primary hover:bg-accent-primary/5 rounded-xl transition-all group text-left">
+                  <div className="h-8 w-8 rounded-lg bg-border/40 dark:bg-white/5 flex items-center justify-center group-hover:bg-accent-primary/10 transition-all">
                     <User className="h-4 w-4" />
                   </div>
                   Profile Settings
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-text-muted hover:text-accent-primary hover:bg-accent-primary/5 rounded-xl transition-all group">
-                  <div className="h-8 w-8 rounded-lg bg-bg-primary flex items-center justify-center group-hover:bg-accent-primary/10 transition-all">
+                <button className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-text-muted hover:text-accent-primary hover:bg-accent-primary/5 rounded-xl transition-all group text-left">
+                  <div className="h-8 w-8 rounded-lg bg-border/40 dark:bg-white/5 flex items-center justify-center group-hover:bg-accent-primary/10 transition-all">
                     <SettingsIcon className="h-4 w-4" />
                   </div>
                   System Settings
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-text-muted hover:text-accent-primary hover:bg-accent-primary/5 rounded-xl transition-all group">
-                  <div className="h-8 w-8 rounded-lg bg-bg-primary flex items-center justify-center group-hover:bg-accent-primary/10 transition-all">
+                <button className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-text-muted hover:text-accent-primary hover:bg-accent-primary/5 rounded-xl transition-all group text-left">
+                  <div className="h-8 w-8 rounded-lg bg-border/40 dark:bg-white/5 flex items-center justify-center group-hover:bg-accent-primary/10 transition-all">
                     <HelpCircle className="h-4 w-4" />
                   </div>
                   Support Center
                 </button>
               </div>
 
-              <div className="p-2 border-t border-border mt-1 bg-bg-primary/30">
+              <div className="p-2 border-t border-border mt-1 bg-black/5 dark:bg-white/5">
                 <button 
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-500/5 rounded-xl transition-all group"

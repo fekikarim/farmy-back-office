@@ -8,28 +8,31 @@ import App from './App.tsx'
 import { QueryProvider } from './providers/QueryProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { SocketProvider } from './providers/SocketProvider'
+import { AuthProvider } from './providers/AuthProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HelmetProvider>
       <ThemeProvider>
-        <QueryProvider>
-          <SocketProvider>
-            <App />
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="colored"
-            />
-          </SocketProvider>
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <SocketProvider>
+              <App />
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+              />
+            </SocketProvider>
+          </QueryProvider>
+        </AuthProvider>
       </ThemeProvider>
     </HelmetProvider>
   </StrictMode>,

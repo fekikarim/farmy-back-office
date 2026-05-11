@@ -6,20 +6,18 @@ import WorkersPage from './pages/Workers';
 import DeliveriesPage from './pages/Deliveries';
 import PageWrapper from './components/layout/PageWrapper';
 import PlaceholderPage from './components/ui/PlaceholderPage';
+import { AuthProvider, useAuth } from './providers/AuthProvider';
+import LoadingOverlay from './components/ui/LoadingOverlay';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem('admin_token');
-  const userString = localStorage.getItem('admin_user');
-  let user = { role: '' };
+  const { isAuthenticated, isLoading } = useAuth();
   
-  try {
-    if (userString) user = JSON.parse(userString);
-  } catch (e) {
-    console.error('Failed to parse user', e);
+  if (isLoading) {
+    return <LoadingOverlay />;
   }
 
-  if (!token || user.role !== 'admin') {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 

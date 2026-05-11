@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-toastify';
 import { Lock, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
 import axiosInstance from '../api/axiosInstance';
+import { useAuth } from '../providers/AuthProvider';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,14 +28,11 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem('admin_token', accessToken);
-      localStorage.setItem('admin_user', JSON.stringify(user));
+      // Update auth context
+      login(accessToken, user);
       
       toast.success(`Welcome back, ${user.profile?.name || 'Admin'}!`);
       navigate('/');
-      
-      // Refresh to initialize socket with token
-      window.location.reload();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
