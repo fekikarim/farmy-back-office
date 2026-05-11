@@ -5,6 +5,8 @@ export interface WorkerFilters {
   search?: string;
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
 }
 
 export const getAdminWorkers = async (filters: WorkerFilters) => {

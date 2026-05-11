@@ -202,7 +202,7 @@ const DataTable = <T extends { id: string | number }>({
       {/* Pagination */}
       <div className="p-4 border-t border-border flex items-center justify-between bg-surface/50">
         <p className="text-xs text-text-muted">
-          Showing <span className="font-bold text-text-primary">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-bold text-text-primary">{Math.min(currentPage * pageSize, data.length)}</span> of <span className="font-bold text-text-primary">{data.length}</span> results
+          Showing <span className="font-bold text-text-primary">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-bold text-text-primary">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-text-primary">{totalCount}</span> results
         </p>
 
         <div className="flex items-center gap-2">
